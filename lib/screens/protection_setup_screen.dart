@@ -324,8 +324,11 @@ class _ProtectionSetupScreenState extends State<ProtectionSetupScreen> {
     setState(() => _isInstalling = true);
 
     try {
-      // Build profile download URL
-      final profileUrl = '${ApiConfig.baseUrl}/api/device/profile/${widget.parentId}';
+      // Get child device ID
+      final childDeviceId = await DeviceService.getDeviceId();
+      
+      // Build profile download URL with child device ID
+      final profileUrl = '${ApiConfig.baseUrl}/device/profile/${widget.parentId}/$childDeviceId';
       
       // Open Safari to download profile
       final uri = Uri.parse(profileUrl);
