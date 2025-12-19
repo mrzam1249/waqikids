@@ -330,6 +330,13 @@ class _ProtectionSetupScreenState extends State<ProtectionSetupScreen> {
       // Build profile download URL with child device ID
       final profileUrl = '${ApiConfig.baseUrl}/device/profile/${widget.parentId}/$childDeviceId';
       
+      print('═══════════════════════════════════════════');
+      print('🔗 PROFILE DOWNLOAD URL:');
+      print('   Parent ID: ${widget.parentId}');
+      print('   Child ID: $childDeviceId');
+      print('   Full URL: $profileUrl');
+      print('═══════════════════════════════════════════');
+      
       // Open Safari to download profile
       final uri = Uri.parse(profileUrl);
       
