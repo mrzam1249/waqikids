@@ -3,9 +3,9 @@ class ApiConfig {
   // Environment detection
   static const bool isProduction = bool.fromEnvironment('dart.vm.product'); 
 
-  // API URLs - Both pointing to Hetzner for testing
-  static const String _developmentUrl = 'http://178.156.160.245:8080/api';
-  static const String _productionUrl = 'http://178.156.160.245:8080/api';   
+  // API URLs - Using dns.waqikids.com with HTTPS
+  static const String _developmentUrl = 'https://dns.waqikids.com/api';
+  static const String _productionUrl = 'https://dns.waqikids.com/api';   
 
   static String get baseUrl => isProduction ? _productionUrl : _developmentUrl;
   
