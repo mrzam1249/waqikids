@@ -149,7 +149,8 @@ class BackendService {
   }
 
   /// Send heartbeat to backend to indicate device is online
-  Future<bool> sendHeartbeat(String deviceId, String parentId, String deviceName, String deviceType, String platform) async {
+  /// Returns: { success: bool, paired: bool } - paired=false means device was unlinked
+  Future<Map<String, dynamic>?> sendHeartbeat(String deviceId, String parentId, String deviceName, String deviceType, String platform) async {
     try {
       print('🔵 Sending heartbeat to $baseUrl/device/heartbeat');
       print('   Device: $deviceId, Parent: $parentId, Name: $deviceName, Type: $deviceType, Platform: $platform');
@@ -167,15 +168,16 @@ class BackendService {
       ).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
-        print('   ✅ Heartbeat sent successfully');
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        print('   ✅ Heartbeat sent successfully, paired: ${data['paired']}');
+        return data;
       } else {
         print('   ❌ Heartbeat failed: ${response.statusCode} - ${response.body}');
+        return null;
       }
-      
-      return response.statusCode == 200;
     } catch (e) {
       print('⚠️ Failed to send heartbeat: $e');
-      return false;
+      return null;
     }
   }
 }

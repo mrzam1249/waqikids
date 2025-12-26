@@ -35,18 +35,37 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  /// Handle heartbeat response - check if device was unlinked
+  Future<void> _handleHeartbeatResponse(Map<String, dynamic>? response) async {
+    if (response == null) return; // Network error, don't logout
+    
+    final paired = response['paired'] == true;
+    if (!paired) {
+      print('🚫 Device was unlinked by parent! Clearing local data and redirecting to pairing...');
+      await DeviceService.clearPairing();
+      
+      if (mounted) {
+        // Navigate to pairing screen and remove all previous routes
+        Navigator.of(context).pushNamedAndRemoveUntil('/pairing', (route) => false);
+      }
+    }
+  }
+
   void _startHeartbeat() {
     // Send heartbeat every 2 minutes (production-ready interval)
     _heartbeatTimer = Timer.periodic(const Duration(minutes: 2), (timer) async {
       if (_deviceId != null && _parentId != null) {
         print('📡 Sending periodic heartbeat: deviceId=$_deviceId, parentId=$_parentId');
-        await _backend.sendHeartbeat(
+        final response = await _backend.sendHeartbeat(
           _deviceId!, 
           _parentId!, 
           _deviceName, 
           Platform.isWindows || Platform.isMacOS || Platform.isLinux ? 'tablet' : 'phone',
           DeviceService.getPlatform()
         );
+        
+        // Check if device was unlinked (uses heartbeat response - no extra API call)
+        await _handleHeartbeatResponse(response);
       } else {
         print('⚠️ Cannot send heartbeat: deviceId=$_deviceId, parentId=$_parentId');
       }
@@ -56,13 +75,16 @@ class _HomeScreenState extends State<HomeScreen> {
     Future.delayed(const Duration(seconds: 2), () async {
       if (_deviceId != null && _parentId != null) {
         print('📡 Sending initial heartbeat: deviceId=$_deviceId, parentId=$_parentId');
-        await _backend.sendHeartbeat(
+        final response = await _backend.sendHeartbeat(
           _deviceId!, 
           _parentId!, 
           _deviceName, 
           Platform.isWindows || Platform.isMacOS || Platform.isLinux ? 'tablet' : 'phone',
           DeviceService.getPlatform()
         );
+        
+        // Check if device was unlinked on startup
+        await _handleHeartbeatResponse(response);
       } else {
         print('⚠️ Cannot send initial heartbeat: deviceId=$_deviceId, parentId=$_parentId');
       }
